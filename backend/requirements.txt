@@ -1,0 +1,22 @@
+# Backend dependencies (tested with Python 3.13). Install with:
+#   pip install -r requirements.txt
+Django==5.2.18
+djangorestframework==3.18.3
+djangorestframework_simplejwt==5.5.1
+django-cors-headers==4.9.0
+django-filter==26.2
+channels==4.3.2
+daphne==4.2.3
+# Only used when REDIS_URL is set (optional; the in-memory layer works for one server process)
+channels_redis==4.3.0
+redis==8.1.0
+psycopg[binary]==3.3.6
+pillow==13.0.0
+python-dotenv==1.2.4
+
+# Tests
+pytest==9.2.0
+pytest-django==4.14.0
+pytest-asyncio==1.4.1
+# Used by tests/live_smoke_test.py
+websockets==15.0.1

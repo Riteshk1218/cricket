@@ -2,15 +2,22 @@
 
     python manage.py simulate_live --matches 1 2 3 4 --interval 3
 
-Each simulated ball goes through the same transactional scoring service used by
-the API, so viewers connected over WebSockets see real updates. Only matches
-whose assigned scorer exists are simulated. Stop with Ctrl+C.
+By default each ball is sent to the running server's REST API, logged in as the
+match's assigned scorer, exactly like a real scorer's phone. That way viewers
+see live WebSocket updates even with the in-memory channel layer (no Redis),
+which only reaches clients of the same process. With Redis configured you can
+use --direct to call the scoring service in this process instead.
+Only matches with an assigned scorer are simulated. Stop with Ctrl+C.
 """
+import json
 import random
 import threading
 import time
+import urllib.error
+import urllib.request
 import uuid
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import close_old_connections
 
@@ -21,11 +28,67 @@ from matches.models import Innings, Match, MatchSquad
 ZONES = ["cover", "mid_wicket", "point", "straight", "square_leg", "fine_leg", "third_man", "mid_off", "mid_on", ""]
 
 
+class ServiceActor:
+    """Calls the scoring service in this process."""
+
+    def __init__(self, scorer):
+        self.scorer = scorer
+
+    def __call__(self, action, match_id, **data):
+        if action == "start-innings":
+            return service.start_innings(self.scorer, match_id, data["striker"], data.get("non_striker"), data["bowler"])
+        if action == "bowler":
+            return service.set_bowler(self.scorer, match_id, data["bowler"])
+        if action == "batter":
+            return service.set_batter(self.scorer, match_id, data["player"], data["end"])
+        if action == "end-innings":
+            return service.end_innings(self.scorer, match_id)
+        if action == "resume":
+            return service.resume_match(self.scorer, match_id)
+        if action == "delivery":
+            return service.record_delivery(self.scorer, match_id, data)
+        raise ValueError(action)
+
+
+class HttpActor:
+    """Posts to the running server's API as the scorer (what the scorer panel does)."""
+
+    def __init__(self, base_url, username, password):
+        self.base = base_url.rstrip("/") + "/api"
+        self.username, self.password = username, password
+        self.token = None
+
+    def _post(self, path, data, auth=True):
+        req = urllib.request.Request(self.base + path, data=json.dumps(data).encode(), method="POST",
+                                     headers={"Content-Type": "application/json"})
+        if auth:
+            req.add_header("Authorization", f"Bearer {self.token}")
+        try:
+            with urllib.request.urlopen(req, timeout=15) as res:
+                return json.loads(res.read() or b"null")
+        except urllib.error.HTTPError as exc:
+            if exc.code == 401 and auth:
+                self.token = None
+            try:
+                body = json.loads(exc.read())
+            except ValueError:
+                body = {}
+            raise ScoringError(str(body.get("detail") or body or exc), body.get("code") or "http_error") from None
+        except urllib.error.URLError as exc:
+            raise ScoringError(f"Cannot reach {self.base}: {exc.reason}. Is runserver running?", "offline") from None
+
+    def __call__(self, action, match_id, **data):
+        if not self.token:
+            self.token = self._post("/auth/login/", {"username": self.username, "password": self.password}, auth=False)["access"]
+        return self._post(f"/matches/{match_id}/score/{action}/", data)
+
+
 class Simulator:
-    def __init__(self, match_id, scorer, rng=None):
+    def __init__(self, match_id, scorer, rng=None, actor=None):
         self.match_id = match_id
         self.scorer = scorer
         self.rng = rng or random.Random()
+        self.act = actor or ServiceActor(scorer)
 
     def match(self):
         return Match.objects.get(pk=self.match_id)
@@ -39,14 +102,14 @@ class Simulator:
         if m.status in Match.FINISHED_STATUSES:
             return None
         if m.status == Match.Status.PAUSED:
-            service.resume_match(self.scorer, m.pk)
+            self.act("resume", m.pk)
             m = self.match()
         inn = m.innings.filter(status=Innings.Status.IN_PROGRESS).first()
         if inn:
             return inn
         plan = service._next_innings_plan(m)
         bat, bowl = self.squad(plan[1]), self.squad(plan[2])
-        service.start_innings(self.scorer, m.pk, bat[0], bat[1] if len(bat) > 1 else None, bowl[-1])
+        self.act("start-innings", m.pk, striker=bat[0], non_striker=bat[1] if len(bat) > 1 else None, bowler=bowl[-1])
         return m.innings.filter(status=Innings.Status.IN_PROGRESS).first()
 
     def step(self):
@@ -65,15 +128,15 @@ class Simulator:
             choices = [p for p in bowl[-6:] if p != state.last_completed_over_bowler and
                        (p not in state.bowlers or state.bowlers[p].balls < limit * state.balls_per_over)]
             choices = choices or [p for p in bowl if p != state.last_completed_over_bowler]
-            service.set_bowler(self.scorer, self.match_id, self.rng.choice(choices))
+            self.act("bowler", self.match_id, bowler=self.rng.choice(choices))
             return True
         if not inn.striker_id or (not inn.non_striker_id and not inn.match.rules.get("last_man_stands")):
             busy = {inn.striker_id, inn.non_striker_id}
             avail = [p for p in self.squad(inn.batting_team_id) if p not in busy and state.batter_is_available(p)]
             if not avail:
-                service.end_innings(self.scorer, self.match_id)
+                self.act("end-innings", self.match_id)
                 return True
-            service.set_batter(self.scorer, self.match_id, avail[0], "striker" if not inn.striker_id else "non_striker")
+            self.act("batter", self.match_id, player=avail[0], end="striker" if not inn.striker_id else "non_striker")
             return True
         r = self.rng.random()
         data = {"client_event_id": str(uuid.uuid4()), "expected_sequence": state.last_sequence + 1,
@@ -92,7 +155,7 @@ class Simulator:
             data["wicket"] = {"kind": kind, "fielder": self.rng.choice(fielders) if kind in ("caught", "run_out") else None}
         else:
             data["runs_bat"] = self.rng.choices([0, 1, 2, 3, 4, 6], weights=[35, 33, 10, 2, 13, 7])[0]
-        service.record_delivery(self.scorer, self.match_id, data)
+        self.act("delivery", self.match_id, **data)
         return True
 
 
@@ -103,6 +166,10 @@ class Command(BaseCommand):
         parser.add_argument("--matches", nargs="*", type=int, help="Match ids (default: all live matches)")
         parser.add_argument("--interval", type=float, default=3.0, help="Seconds between balls in each match")
         parser.add_argument("--balls", type=int, default=0, help="Stop after N events per match (0 = until finished)")
+        parser.add_argument("--server", default="http://127.0.0.1:8000", help="Running server to send balls to")
+        parser.add_argument("--password", default="Cricket@123", help="Password of the assigned scorer accounts")
+        parser.add_argument("--direct", action="store_true",
+                            help="Score in this process instead of via the API (viewers only see it live with Redis)")
 
     def handle(self, *args, **opts):
         ids = opts["matches"] or list(Match.objects.filter(status__in=Match.LIVE_STATUSES).values_list("pk", flat=True))
@@ -120,6 +187,8 @@ class Command(BaseCommand):
             t.start()
             threads.append(t)
             self.stdout.write(f"Simulating match {mid}: {match} (scorer {assignment.scorer.username})")
+        if opts["direct"] and not settings.REDIS_URL:
+            self.stderr.write("Warning: --direct without REDIS_URL; open pages will not update until refreshed.")
         try:
             while any(t.is_alive() for t in threads):
                 time.sleep(0.5)
@@ -127,7 +196,8 @@ class Command(BaseCommand):
             self.stdout.write("Stopped.")
 
     def _run(self, mid, scorer, opts):
-        sim = Simulator(mid, scorer)
+        actor = None if opts["direct"] else HttpActor(opts["server"], scorer.username, opts["password"])
+        sim = Simulator(mid, scorer, actor=actor)
         count = 0
         while True:
             close_old_connections()

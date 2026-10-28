@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Local development only: the Django server runs over plain HTTP on the laptop's
+  LAN IP (for example http://192.168.1.10:8000), so cleartext traffic is allowed.
+  Use HTTPS and remove this before any public release.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>
