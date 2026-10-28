@@ -1,6 +1,6 @@
 # Builds the Android debug APK on GitHub (free for public repos), so you don't
-# need Flutter or Android Studio on your PC. Download it from the run's
-# "Artifacts" section: Actions tab -> latest "Build Android APK" run.
+# need Flutter or Android Studio on your PC. Download it on your phone from
+# https://github.com/<owner>/<repo>/releases/tag/android-latest (CricLive-debug.apk).
 name: Build Android APK
 
 on:
@@ -8,6 +8,9 @@ on:
     branches: [main]
     paths: ["mobile/**", ".github/workflows/android-apk.yml"]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   apk:
@@ -17,7 +20,7 @@ jobs:
         working-directory: mobile
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
@@ -34,3 +37,15 @@ jobs:
           name: criclive-debug-apk
           path: mobile/build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
+      - run: cp build/app/outputs/flutter-apk/app-debug.apk build/CricLive-debug.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-latest
+          name: CricLive Android app (latest debug build)
+          body: |
+            Debug APK for testing on your own phones (not for the Play Store).
+            Install: open this page on the phone, tap CricLive-debug.apk, allow "Install unknown apps".
+            Then in the app: More -> Settings -> Server address -> http://<laptop-wifi-ip>:8000 -> Save & Test connection.
+            Built from commit ${{ github.sha }}.
+          files: mobile/build/CricLive-debug.apk
+          make_latest: true
