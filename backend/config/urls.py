@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import include, path
 
+from core.views import AuditLogList
+
 
 def health(request):
     return JsonResponse({"status": "ok"})
@@ -12,6 +14,7 @@ def health(request):
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", health),
+    path("api/audit/", AuditLogList.as_view(), name="audit-log"),
     path("api/", include("accounts.urls")),
     path("api/", include("tournaments.urls")),
     path("api/", include("matches.urls")),

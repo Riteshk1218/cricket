@@ -1,0 +1,77 @@
+// Interface labels in English, Marathi and Hindi. Missing keys fall back to English.
+export const LANGS = [
+  { code: 'en', label: 'English' },
+  { code: 'mr', label: 'मराठी' },
+  { code: 'hi', label: 'हिन्दी' },
+]
+
+const en = {
+  home: 'Home', matches: 'Matches', tournaments: 'Tournaments', teams: 'Teams', players: 'Players', stats: 'Statistics',
+  live: 'Live', upcoming: 'Upcoming', completed: 'Completed', liveMatches: 'Live matches', upcomingMatches: 'Upcoming matches',
+  completedMatches: 'Recent results', viewAll: 'View all', login: 'Log in', logout: 'Log out', register: 'Create account',
+  admin: 'Admin', scorer: 'Scorer', settings: 'Settings', profile: 'Profile', search: 'Search',
+  overs: 'Overs', target: 'Target', runRate: 'CRR', reqRate: 'RRR', need: 'Need', from: 'from', balls: 'balls',
+  batting: 'Batting', bowling: 'Bowling', batter: 'Batter', bowler: 'Bowler', runs: 'R', ballsShort: 'B',
+  fours: '4s', sixes: '6s', strikeRate: 'SR', oversShort: 'O', maidens: 'M', wicketsShort: 'W', economy: 'Econ',
+  extras: 'Extras', total: 'Total', fallOfWickets: 'Fall of wickets', partnerships: 'Partnerships',
+  commentary: 'Commentary', scorecard: 'Scorecard', overview: 'Live', squads: 'Squads', recent: 'Recent',
+  yetToBat: 'Yet to bat', thisOver: 'This over', partnership: 'Partnership', freeHit: 'FREE HIT', powerplay: 'Powerplay',
+  toss: 'Toss', result: 'Result', viewers: 'watching', noMatches: 'No matches here yet.',
+  pointsTable: 'Points table', fixtures: 'Fixtures', leaderboards: 'Leaderboards', played: 'P', won: 'W', lost: 'L',
+  tied: 'T', noResult: 'NR', points: 'Pts', nrr: 'NRR', matchesShort: 'M', innings: 'Inns', notOuts: 'NO',
+  average: 'Avg', highest: 'HS', fifties: '50s', hundreds: '100s', wickets: 'Wickets', best: 'Best',
+  catches: 'Catches', runOuts: 'Run outs', stumpings: 'Stumpings', fielding: 'Fielding',
+  mostRuns: 'Most runs', mostWickets: 'Most wickets', highestSR: 'Highest strike rate', bestEconomy: 'Best economy',
+  mostSixes: 'Most sixes', mostFours: 'Most fours', highestScores: 'Highest scores', mostCatches: 'Most catches',
+  language: 'Language', theme: 'Theme', light: 'Light', dark: 'Dark', sound: 'Sound effects', volume: 'Volume',
+  animations: 'Boundary & wicket animations', mute: 'Mute', unmute: 'Unmute', follow: 'Follow', following: 'Following',
+  four: 'FOUR!', six: 'SIX!', wicket: 'WICKET!', inningsBreak: 'Innings break', interrupted: 'Match interrupted',
+  winner: 'Winner', runnerUp: 'Runner-up', allTournaments: 'All tournaments', connection: 'Connection',
+  reconnecting: 'Reconnecting…', connected: 'Live updates on', matchClock: 'Match time', ground: 'Ground',
+}
+
+const mr = {
+  home: 'मुख्यपृष्ठ', matches: 'सामने', tournaments: 'स्पर्धा', teams: 'संघ', players: 'खेळाडू', stats: 'आकडेवारी',
+  live: 'थेट', upcoming: 'आगामी', completed: 'पूर्ण', liveMatches: 'थेट सामने', upcomingMatches: 'आगामी सामने',
+  completedMatches: 'अलीकडील निकाल', viewAll: 'सर्व पहा', login: 'लॉग इन', logout: 'लॉग आउट', register: 'खाते तयार करा',
+  admin: 'प्रशासक', scorer: 'गुणलेखक', settings: 'सेटिंग्ज', profile: 'प्रोफाइल', search: 'शोधा',
+  overs: 'षटके', target: 'लक्ष्य', runRate: 'धावगती', reqRate: 'आवश्यक धावगती', need: 'हव्या', from: 'चेंडूंमध्ये', balls: '',
+  batting: 'फलंदाजी', bowling: 'गोलंदाजी', batter: 'फलंदाज', bowler: 'गोलंदाज', extras: 'अतिरिक्त', total: 'एकूण',
+  fallOfWickets: 'विकेट पडण्याचा क्रम', partnerships: 'भागीदारी', commentary: 'समालोचन', scorecard: 'धावफलक',
+  overview: 'थेट', squads: 'संघ यादी', recent: 'अलीकडील', yetToBat: 'फलंदाजी बाकी', thisOver: 'हे षटक',
+  partnership: 'भागीदारी', freeHit: 'फ्री हिट', powerplay: 'पॉवरप्ले', toss: 'नाणेफेक', result: 'निकाल',
+  viewers: 'पाहत आहेत', noMatches: 'अजून सामने नाहीत.', pointsTable: 'गुणतालिका', fixtures: 'वेळापत्रक',
+  leaderboards: 'अव्वल खेळाडू', wickets: 'बळी', best: 'सर्वोत्तम', catches: 'झेल', runOuts: 'धावबाद',
+  stumpings: 'यष्टिचीत', fielding: 'क्षेत्ररक्षण', mostRuns: 'सर्वाधिक धावा', mostWickets: 'सर्वाधिक बळी',
+  highestSR: 'सर्वोच्च स्ट्राइक रेट', bestEconomy: 'सर्वोत्तम इकॉनॉमी', mostSixes: 'सर्वाधिक षटकार',
+  mostFours: 'सर्वाधिक चौकार', highestScores: 'सर्वोच्च धावसंख्या', mostCatches: 'सर्वाधिक झेल',
+  language: 'भाषा', theme: 'थीम', light: 'उजळ', dark: 'गडद', sound: 'ध्वनी प्रभाव', volume: 'आवाज',
+  animations: 'चौकार/षटकार/विकेट अ‍ॅनिमेशन', mute: 'आवाज बंद', unmute: 'आवाज सुरू', follow: 'फॉलो करा', following: 'फॉलो करत आहात',
+  four: 'चौकार!', six: 'षटकार!', wicket: 'विकेट!', inningsBreak: 'डावांमधील विश्रांती', interrupted: 'सामना थांबला',
+  winner: 'विजेता', runnerUp: 'उपविजेता', allTournaments: 'सर्व स्पर्धा', connection: 'जोडणी',
+  reconnecting: 'पुन्हा जोडत आहे…', connected: 'थेट अपडेट सुरू', matchClock: 'सामन्याचा वेळ', ground: 'मैदान',
+}
+
+const hi = {
+  home: 'होम', matches: 'मैच', tournaments: 'टूर्नामेंट', teams: 'टीमें', players: 'खिलाड़ी', stats: 'आँकड़े',
+  live: 'लाइव', upcoming: 'आगामी', completed: 'समाप्त', liveMatches: 'लाइव मैच', upcomingMatches: 'आगामी मैच',
+  completedMatches: 'हाल के परिणाम', viewAll: 'सभी देखें', login: 'लॉग इन', logout: 'लॉग आउट', register: 'खाता बनाएँ',
+  admin: 'एडमिन', scorer: 'स्कोरर', settings: 'सेटिंग्स', profile: 'प्रोफ़ाइल', search: 'खोजें',
+  overs: 'ओवर', target: 'लक्ष्य', runRate: 'रन रेट', reqRate: 'आवश्यक रन रेट', need: 'चाहिए', from: 'गेंदों में', balls: '',
+  batting: 'बल्लेबाज़ी', bowling: 'गेंदबाज़ी', batter: 'बल्लेबाज़', bowler: 'गेंदबाज़', extras: 'अतिरिक्त', total: 'कुल',
+  fallOfWickets: 'विकेट पतन', partnerships: 'साझेदारियाँ', commentary: 'कमेंट्री', scorecard: 'स्कोरकार्ड',
+  overview: 'लाइव', squads: 'टीम सूची', recent: 'हाल की गेंदें', yetToBat: 'बल्लेबाज़ी बाकी', thisOver: 'यह ओवर',
+  partnership: 'साझेदारी', freeHit: 'फ्री हिट', powerplay: 'पावरप्ले', toss: 'टॉस', result: 'परिणाम',
+  viewers: 'देख रहे हैं', noMatches: 'अभी कोई मैच नहीं।', pointsTable: 'अंक तालिका', fixtures: 'कार्यक्रम',
+  leaderboards: 'शीर्ष खिलाड़ी', wickets: 'विकेट', best: 'सर्वश्रेष्ठ', catches: 'कैच', runOuts: 'रन आउट',
+  stumpings: 'स्टंपिंग', fielding: 'फील्डिंग', mostRuns: 'सबसे ज़्यादा रन', mostWickets: 'सबसे ज़्यादा विकेट',
+  highestSR: 'सर्वोच्च स्ट्राइक रेट', bestEconomy: 'सर्वश्रेष्ठ इकॉनमी', mostSixes: 'सबसे ज़्यादा छक्के',
+  mostFours: 'सबसे ज़्यादा चौके', highestScores: 'सर्वोच्च स्कोर', mostCatches: 'सबसे ज़्यादा कैच',
+  language: 'भाषा', theme: 'थीम', light: 'लाइट', dark: 'डार्क', sound: 'साउंड इफ़ेक्ट', volume: 'आवाज़',
+  animations: 'चौका/छक्का/विकेट एनिमेशन', mute: 'म्यूट', unmute: 'अनम्यूट', follow: 'फ़ॉलो करें', following: 'फ़ॉलो कर रहे हैं',
+  four: 'चौका!', six: 'छक्का!', wicket: 'विकेट!', inningsBreak: 'पारी विराम', interrupted: 'मैच रुका',
+  winner: 'विजेता', runnerUp: 'उपविजेता', allTournaments: 'सभी टूर्नामेंट', connection: 'कनेक्शन',
+  reconnecting: 'दोबारा जुड़ रहा है…', connected: 'लाइव अपडेट चालू', matchClock: 'मैच समय', ground: 'मैदान',
+}
+
+export const STRINGS = { en, mr, hi }

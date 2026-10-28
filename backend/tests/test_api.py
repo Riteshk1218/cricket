@@ -312,3 +312,12 @@ def test_audit_log_records_scoring(scorer):
     service.undo_last(scorer, match.pk)
     actions = list(AuditLog.objects.filter(match=match).values_list("action", flat=True))
     assert "scoring.delivery" in actions and "scoring.undo" in actions
+
+
+def test_audit_log_endpoint_is_super_admin_only(api, super_admin, scorer):
+    ready_match(scorer)
+    auth(api, scorer)
+    assert api.get("/api/audit/").status_code == 403
+    auth(api, super_admin)
+    r = api.get("/api/audit/")
+    assert r.status_code == 200 and r.data["count"] >= 1

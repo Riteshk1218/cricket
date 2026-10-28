@@ -66,7 +66,7 @@ def commentary_entries(innings, names, state, deliveries, limit=None, wickets=No
         }
         entries.append({
             "type": "ball", "delivery_id": d.pk, "sequence": d.sequence,
-            "over": f"{d.over_number}.{d.ball_in_over}", "label": ball_label(d),
+            "over": f"{d.over_number}.{d.ball_in_over if d.is_legal else d.ball_in_over + 1}", "label": ball_label(d),
             "runs": d.total_runs, "highlight": highlight_for(d), "is_free_hit": d.is_free_hit,
             "batter": names.get(d.striker_id, ""), "bowler": names.get(d.bowler_id, ""),
             "score": f"{running}/{running_wkts}", "text": text, "note": d.note,

@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", "Noto Sans Devanagari", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-pitch-50: #effaf6;
+  --color-pitch-100: #d8f3e8;
+  --color-pitch-200: #b3e6d3;
+  --color-pitch-300: #7fd2b8;
+  --color-pitch-400: #46b596;
+  --color-pitch-500: #22997b;
+  --color-pitch-600: #157b64;
+  --color-pitch-700: #136252;
+  --color-pitch-800: #134e43;
+  --color-pitch-900: #114139;
+  --color-pitch-950: #06241f;
+  --color-ball: #c81e1e;
+  --color-gold: #f2b01e;
+}
+
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+}
+
+@utility card { @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900; }
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-pitch-500 disabled:cursor-not-allowed disabled:opacity-50; }
+@utility btn-primary { @apply btn bg-pitch-600 text-white hover:bg-pitch-700; }
+@utility btn-secondary { @apply btn border border-slate-300 bg-white text-slate-800 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700; }
+@utility btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+@utility btn-ghost { @apply btn text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800; }
+@utility input { @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-pitch-500 focus:outline-none focus:ring-2 focus:ring-pitch-500/30 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100; }
+@utility label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400; }
+@utility table-basic {
+  @apply w-full text-sm;
+  & th { @apply px-2 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400; }
+  & td { @apply border-t border-slate-100 px-2 py-2 dark:border-slate-800; }
+}
+@utility chip { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+
+/* Live indicator */
+@keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.live-dot { animation: live-pulse 1.4s ease-in-out infinite; }
+
+/* Celebration overlay animations (transform/opacity only, so they stay smooth). */
+@keyframes celebrate-pop {
+  0% { transform: scale(.3) rotate(-8deg); opacity: 0; }
+  20% { transform: scale(1.15) rotate(2deg); opacity: 1; }
+  35% { transform: scale(1) rotate(0); }
+  80% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
+}
+@keyframes celebrate-burst {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(.4); opacity: 0; }
+}
+@keyframes wicket-shake {
+  0%, 100% { transform: translateX(0) scale(1); }
+  15% { transform: translateX(-14px) scale(1.05); }
+  30% { transform: translateX(12px); }
+  45% { transform: translateX(-8px); }
+  60% { transform: translateX(6px); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: scale(.9); }
+}
+@keyframes bails-fly {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--dx), -90px) rotate(var(--rot)); opacity: 0; }
+}
+@keyframes ball-in { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.celebrate-text { animation: celebrate-pop 2.2s cubic-bezier(.2,.8,.2,1) forwards; }
+.burst { animation: celebrate-burst 1.4s ease-out forwards; }
+.wicket-text { animation: wicket-shake 2.2s ease-out forwards; }
+.bail { animation: bails-fly 1.2s ease-out forwards; }
+.ball-in { animation: ball-in .35s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .celebrate-text, .burst, .wicket-text, .bail, .live-dot, .ball-in { animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

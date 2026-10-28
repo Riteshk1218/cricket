@@ -71,10 +71,10 @@ class TournamentSerializer(serializers.ModelSerializer):
         overs = attrs.pop("overs", None)
         fmt = attrs.get("match_format", getattr(self.instance, "match_format", "T20"))
         ball = attrs.get("ball_type", getattr(self.instance, "ball_type", "leather"))
-        if "rules" in attrs or overs or self.instance is None or "match_format" in attrs or "ball_type" in attrs:
-            base = default_rules(fmt, ball, overs)
-            if self.instance is not None and "match_format" not in attrs and "ball_type" not in attrs and not overs:
-                base = dict(self.instance.rules)
+        preset_changed = self.instance is None or overs or fmt != self.instance.match_format or ball != self.instance.ball_type
+        if preset_changed or "rules" in attrs:
+            # A new format/ball type starts from its preset; otherwise edits apply on top of the current rules.
+            base = default_rules(fmt, ball, overs) if preset_changed else dict(self.instance.rules)
             base.update(attrs.get("rules") or {})
             from django.core.exceptions import ValidationError
 
