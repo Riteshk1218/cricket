@@ -44,6 +44,12 @@ checking on a real Windows PC, Android phone and Mac.
     * login as `scorer1` → My scoring matches → scorer panel: run, wide, bowled wicket, automatic
       new-batter prompt, end of over, automatic bowler prompt (previous bowler excluded), undo
       with confirmation.
+* **Docker one-click setup** (`docker-compose.yml`): built and started on Linux.
+  * PostgreSQL, the backend and the website all came up, and demo data loaded on the first start.
+  * Data was kept after a restart (demo data was not loaded again).
+  * The website loaded in Chromium with no errors, showing the live matches.
+  * The 4-match smoke test passed against the containers.
+  * The `.bat` files themselves were not run, because no Windows machine was available.
 * `pip install -r backend/requirements.txt` works in a clean virtual environment (Python 3.13).
 
 ## Not verified (could not be tested here)

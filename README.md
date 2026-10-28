@@ -3,7 +3,7 @@
 A free, local-network cricket scoring system. Scorers record ball by ball on a phone or laptop,
 and everyone on the same Wi-Fi sees the score, scorecard, commentary (English, मराठी, हिंदी) and
 FOUR/SIX/WICKET animations update instantly. Up to 4 or more matches can run at the same time.
-No paid services, no Docker, no cloud.
+No paid services and no cloud. Docker is optional (one-click start below).
 
 | Part | Tech | Folder |
 |---|---|---|
@@ -14,7 +14,19 @@ No paid services, no Docker, no cloud.
 | Helper scripts | PowerShell start/setup scripts, sound generator | `scripts/` |
 | Live smoke test | 4-match WebSocket check | `tests/` |
 
-## Quick start (Windows)
+## One-click start
+
+**With Docker Desktop (easiest):** install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+(free for personal use), start it, then double-click **`start-docker.bat`**. It starts PostgreSQL,
+the backend (with demo data on first run) and the website, then opens http://localhost:5173.
+Stop it with `stop-docker.bat`. On Mac/Linux: `docker compose up --build`.
+
+**Without Docker:** after installing Python, Node.js and PostgreSQL and creating the database
+(Windows guide Steps 1–4), double-click **`start.bat`**. The first run does the setup for you.
+
+Docker is optional. Everything also runs directly on Windows, as described below.
+
+## Quick start (Windows, manual)
 
 Full beginner steps are in **[docs/WINDOWS_SETUP.md](docs/WINDOWS_SETUP.md)**. In short:
 

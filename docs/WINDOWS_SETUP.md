@@ -9,6 +9,14 @@ on the same Wi-Fi watch and score matches. No Docker or cloud services are neede
 > on Linux (see `docs/PROGRESS_REPORT.md`). If a command fails on your PC, the
 > *Troubleshooting* table at the end covers the common problems.
 
+> **Shortcut: Docker.** If you install Docker Desktop (free for personal use, https://www.docker.com/products/docker-desktop/),
+> you can skip Steps 3–11: start Docker Desktop and double-click `start-docker.bat` in the project folder.
+> It runs the database, backend and website and loads the demo data. You still need Steps 13–14
+> for phones and Steps 15–16 for the Android app. To simulate the 4 live matches inside Docker:
+> `docker compose exec backend python manage.py simulate_live`.
+>
+> **Shortcut without Docker:** after Steps 1–4, double-click `start.bat`. It runs Steps 5–9 and 11 for you.
+
 Open **Windows PowerShell** for all commands (Start menu → type "PowerShell").
 Lines starting with `#` are comments; you don't need to type them.
 
