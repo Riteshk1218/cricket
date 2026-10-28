@@ -24,6 +24,9 @@ Stop it with `stop-docker.bat`. On Mac/Linux: `docker compose up --build`.
 **Without Docker:** after installing Python, Node.js and PostgreSQL and creating the database
 (Windows guide Steps 1–4), double-click **`start.bat`**. The first run does the setup for you.
 
+**Android app without installing Flutter:** every push to `main` builds the debug APK on GitHub.
+On the phone, download `CricLive-debug.apk` from the repository's **Releases → android-latest** page.
+
 Docker is optional. Everything also runs directly on Windows, as described below.
 
 ## Quick start (Windows, manual)
