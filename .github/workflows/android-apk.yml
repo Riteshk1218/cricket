@@ -1,0 +1,36 @@
+# Builds the Android debug APK on GitHub (free for public repos), so you don't
+# need Flutter or Android Studio on your PC. Download it from the run's
+# "Artifacts" section: Actions tab -> latest "Build Android APK" run.
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**", ".github/workflows/android-apk.yml"]
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: criclive-debug-apk
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
