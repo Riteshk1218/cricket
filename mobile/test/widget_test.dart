@@ -31,6 +31,15 @@ void main() {
       expect(s.serverUrl, 'http://192.168.1.10:9000');
     });
 
+    test('hosted https address keeps the default port', () async {
+      final s = await makeState();
+      await s.setServerUrl('criclive.onrender.com');
+      expect(s.serverUrl, 'https://criclive.onrender.com');
+      expect(s.wsUrl, 'wss://criclive.onrender.com');
+      await s.setServerUrl('https://criclive.onrender.com/');
+      expect(s.apiUrl, 'https://criclive.onrender.com/api');
+    });
+
     test('settings and session persist', () async {
       final s = await makeState();
       await s.setLanguage('mr');

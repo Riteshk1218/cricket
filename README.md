@@ -57,6 +57,11 @@ Demo accounts (password `Cricket@123`): `superadmin`, `tadmin`, `scorer1` … `s
 (one per live match), `viewer`. On a phone, use `http://<laptop-wifi-ip>:5173` for the website
 and set the app's **Settings → Server address** to `http://<laptop-wifi-ip>:8000`.
 
+## Host it online (Render, free)
+
+`render.yaml` sets up the website, API, live scores and database on Render
+in one go. Step-by-step guide: [docs/RENDER_HOSTING.md](docs/RENDER_HOSTING.md).
+
 ## Tests
 
 ```powershell

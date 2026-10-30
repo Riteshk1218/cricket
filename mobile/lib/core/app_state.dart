@@ -59,9 +59,15 @@ class AppState extends ChangeNotifier {
 
   Future<void> setServerUrl(String url) async {
     var u = url.trim();
-    if (!u.startsWith('http')) u = 'http://$u';
+    if (!u.startsWith('http')) {
+      // A laptop IP or localhost uses plain http; a hosted address such as
+      // criclive.onrender.com uses https.
+      final local = RegExp(r'^(localhost|\d+\.\d+\.\d+\.\d+)(:|/|$)').hasMatch(u);
+      u = '${local ? 'http' : 'https'}://$u';
+    }
     u = u.replaceAll(RegExp(r'/+$'), '');
-    if (!RegExp(r':\d+$').hasMatch(u)) u = '$u:8000';
+    // Only the laptop server needs the :8000 port; https sites use the default port.
+    if (u.startsWith('http://') && !RegExp(r':\d+$').hasMatch(u)) u = '$u:8000';
     _serverUrl = u;
     await _prefs.setString('serverUrl', u);
     notifyListeners();
