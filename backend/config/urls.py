@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import JsonResponse
-from django.urls import include, path
+from django.http import FileResponse, Http404, JsonResponse
+from django.urls import include, path, re_path
+from django.views.static import serve
 
 from core.views import AuditLogList
 
@@ -22,5 +23,18 @@ urlpatterns = [
     path("api/", include("analytics.urls")),
 ]
 
+def website(request):
+    """Return the website's index.html for page URLs like /matches/5 (React handles routing)."""
+    index = settings.FRONTEND_DIST / "index.html"
+    if not index.exists():
+        raise Http404("Website not built")
+    return FileResponse(open(index, "rb"), content_type="text/html")
+
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+elif settings.SERVE_MEDIA:
+    urlpatterns += [re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT})]
+
+if (settings.FRONTEND_DIST / "index.html").exists():
+    urlpatterns += [re_path(r"^(?!api/|admin/|ws/|media/|static/).*$", website)]

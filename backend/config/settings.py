@@ -7,6 +7,7 @@ All environment-specific values are read from environment variables
 import os
 from datetime import timedelta
 from pathlib import Path
+from urllib.parse import parse_qsl, unquote, urlparse
 
 from dotenv import load_dotenv
 
@@ -44,6 +45,11 @@ if not SECRET_KEY:
 # can reach the laptop's LAN IP. Restrict this list if DEBUG is off.
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "*" if DEBUG else "localhost,127.0.0.1")
 
+# Render (and similar hosts) tell the app its public hostname, e.g. criclive.onrender.com.
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if RENDER_EXTERNAL_HOSTNAME and "*" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 INSTALLED_APPS = [
     "daphne",  # ASGI runserver with WebSocket support (must be first)
     "django.contrib.admin",
@@ -69,6 +75,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,16 +104,20 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 ASGI_APPLICATION = "config.asgi.application"
 
+# DATABASE_URL (given by Render and most hosts) wins over the POSTGRES_* values.
+_db_url = urlparse(os.environ.get("DATABASE_URL", "").strip())
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB", "cricket_live"),
-        "USER": os.environ.get("POSTGRES_USER", "cricket"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
-        "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        "NAME": unquote(_db_url.path.lstrip("/")) if _db_url.path else os.environ.get("POSTGRES_DB", "cricket_live"),
+        "USER": unquote(_db_url.username or "") or os.environ.get("POSTGRES_USER", "cricket"),
+        "PASSWORD": unquote(_db_url.password or "") or os.environ.get("POSTGRES_PASSWORD", ""),
+        "HOST": _db_url.hostname or os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": str(_db_url.port or os.environ.get("POSTGRES_PORT", "5432")),
         "CONN_MAX_AGE": 60,
         "ATOMIC_REQUESTS": False,
+        # e.g. ?sslmode=require from hosted databases such as Neon
+        "OPTIONS": dict(parse_qsl(_db_url.query)),
     }
 }
 
@@ -127,6 +138,20 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
+# Optional: the built website (frontend/dist). When this folder exists, the
+# backend also serves the website from the same address (used on Render).
+FRONTEND_DIST = Path(os.environ.get("FRONTEND_DIST", PROJECT_ROOT / "frontend" / "dist"))
+if (FRONTEND_DIST / "index.html").exists():
+    WHITENOISE_ROOT = FRONTEND_DIST
+    WHITENOISE_INDEX_FILE = True
+# Serve uploaded files (team logos, photos) from Django itself. Fine for a
+# small single-server setup; on Render's free plan uploads are lost on restart.
+SERVE_MEDIA = env_bool("SERVE_MEDIA", DEBUG)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.environ.get("MEDIA_ROOT", BASE_DIR / "media"))
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
@@ -171,6 +196,14 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = env_bool("CORS_ALLOW_ALL", DEBUG)
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
 CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+
+# Behind Render's HTTPS proxy: trust its header so Django knows the request was secure.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = env_bool("SECURE_COOKIES", True)
+    CSRF_COOKIE_SECURE = env_bool("SECURE_COOKIES", True)
 
 # --- Channels / Redis ------------------------------------------------------
 # With REDIS_URL set, WebSocket groups are shared through Redis (needed when

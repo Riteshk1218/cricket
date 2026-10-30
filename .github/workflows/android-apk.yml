@@ -45,7 +45,7 @@ jobs:
           body: |
             Debug APK for testing on your own phones (not for the Play Store).
             Install: open this page on the phone, tap CricLive-debug.apk, allow "Install unknown apps".
-            Then in the app: More -> Settings -> Server address -> http://<laptop-wifi-ip>:8000 -> Save & Test connection.
+            Then in the app: More -> Settings -> Server address -> your Render address (https://<name>.onrender.com) or http://<laptop-wifi-ip>:8000 -> Save & Test connection.
             Built from commit ${{ github.sha }}.
           files: mobile/build/CricLive-debug.apk
           make_latest: true
