@@ -1,8 +1,11 @@
 #!/bin/sh
 # Start-up on Render: update the database, create the admin account (and demo
 # data if asked) on first run, then start the API + WebSocket server.
+# The setup runs in the background so the server opens its port at once: the
+# free plan is slow, and Render gives up if no port opens soon after start.
 set -e
 
+setup() {
 python manage.py migrate --noinput
 
 if [ -n "$ADMIN_PASSWORD" ]; then
@@ -25,5 +28,8 @@ if not User.objects.filter(username=name).exists():
 else
   echo "ADMIN_PASSWORD is not set: no admin account or demo data created."
 fi
+}
+
+setup &
 
 exec daphne --bind 0.0.0.0 --port "${PORT:-10000}" --proxy-headers config.asgi:application
