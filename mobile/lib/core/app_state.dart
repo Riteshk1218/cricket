@@ -7,7 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// App-wide settings and session, persisted on the device.
 class AppState extends ChangeNotifier {
   AppState(this._prefs) {
-    _serverUrl = _prefs.getString('serverUrl') ?? defaultServerUrl;
+    var saved = _prefs.getString('serverUrl');
+    // Once, after updating to the hosted-server build: switch an old laptop/emulator
+    // (http://) address to the hosted server. Users can change it back in Settings.
+    if (_prefs.getBool('hostedServerMigrated') != true) {
+      if (saved != null && saved.startsWith('http://')) saved = null;
+      _prefs.setBool('hostedServerMigrated', true);
+    }
+    _serverUrl = saved ?? defaultServerUrl;
     _language = _prefs.getString('language') ?? 'en';
     _themeMode = ThemeMode.values[_prefs.getInt('themeMode') ?? ThemeMode.system.index];
     _sound = _prefs.getBool('sound') ?? true;
@@ -21,9 +28,10 @@ class AppState extends ChangeNotifier {
     _prefs.setString('visitorId', _visitorId);
   }
 
-  /// Android emulator reaches the host computer at 10.0.2.2. On a real phone,
-  /// enter the laptop's Wi-Fi IP address in Settings (for example http://192.168.1.10:8000).
-  static const defaultServerUrl = 'http://10.0.2.2:8000';
+  /// The hosted server on Render. To use a laptop on the same Wi-Fi instead, enter
+  /// its address in Settings (for example http://192.168.1.10:8000; the Android
+  /// emulator reaches the host computer at http://10.0.2.2:8000).
+  static const defaultServerUrl = 'https://criclive-ur9a.onrender.com';
 
   final SharedPreferences _prefs;
   late String _serverUrl;

@@ -22,13 +22,21 @@ void main() {
   group('AppState', () {
     test('server address is normalised for LAN use', () async {
       final s = await makeState();
-      expect(s.serverUrl, 'http://10.0.2.2:8000');
+      expect(s.serverUrl, AppState.defaultServerUrl);
       await s.setServerUrl(' 192.168.1.10 ');
       expect(s.serverUrl, 'http://192.168.1.10:8000');
       expect(s.apiUrl, 'http://192.168.1.10:8000/api');
       expect(s.wsUrl, 'ws://192.168.1.10:8000');
       await s.setServerUrl('http://192.168.1.10:9000/');
       expect(s.serverUrl, 'http://192.168.1.10:9000');
+    });
+
+    test('an old laptop address moves to the hosted server once', () async {
+      final s = await makeState({'serverUrl': 'http://192.168.1.10:8000'});
+      expect(s.serverUrl, AppState.defaultServerUrl);
+      await s.setServerUrl('192.168.1.10');
+      final again = AppState(await SharedPreferences.getInstance());
+      expect(again.serverUrl, 'http://192.168.1.10:8000');
     });
 
     test('hosted https address keeps the default port', () async {

@@ -4,7 +4,7 @@ Android (debug APK) and iOS (source only) app for the cricket live scoring syste
 
 ```powershell
 flutter pub get
-flutter run                  # emulator uses http://10.0.2.2:8000 by default
+flutter run                  # uses the hosted Render server by default; change it in Settings
 flutter build apk --debug    # build\app\outputs\flutter-apk\app-debug.apk
 flutter analyze; flutter test
 ```

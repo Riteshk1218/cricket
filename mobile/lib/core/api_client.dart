@@ -23,7 +23,8 @@ class ApiException implements Exception {
 class ApiClient {
   ApiClient(this.state);
   final AppState state;
-  static const _timeout = Duration(seconds: 12);
+  // Long enough for the free hosted server to wake up from sleep (about a minute).
+  static const _timeout = Duration(seconds: 75);
 
   Uri _uri(String path, [Map<String, dynamic>? query]) {
     final q = query?.map((k, v) => MapEntry(k, '$v'))?..removeWhere((k, v) => v == 'null');
@@ -51,7 +52,7 @@ class ApiClient {
       if (body != null) req.body = jsonEncode(body);
       res = await http.Response.fromStream(await req.send().timeout(_timeout));
     } on TimeoutException {
-      throw ApiException('The server did not respond. Check the server address in Settings and that the laptop is on the same Wi-Fi.');
+      throw ApiException('The server did not respond. It may be waking up: wait a minute and tap Retry. Also check the server address in Settings.');
     } on SocketException {
       throw ApiException('Cannot reach ${state.serverUrl}. Start the backend with "runserver 0.0.0.0:8000" and check the IP address.');
     } on http.ClientException catch (e) {
