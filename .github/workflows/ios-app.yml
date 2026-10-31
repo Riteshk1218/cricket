@@ -12,6 +12,8 @@ on:
   push:
     branches: [main]
     paths: ["mobile/**", ".github/workflows/ios-app.yml"]
+  pull_request:
+    paths: ["mobile/**", ".github/workflows/ios-app.yml"]
   workflow_dispatch:
 
 permissions:
@@ -42,7 +44,8 @@ jobs:
           name: criclive-unsigned-ipa
           path: mobile/build/CricLive-unsigned.ipa
           retention-days: 30
-      - uses: softprops/action-gh-release@v2
+      - if: github.event_name != 'pull_request'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ios-latest
           name: CricLive iPhone app (latest unsigned build)
