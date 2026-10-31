@@ -217,8 +217,9 @@ flutter devices           # shows the emulator or your phone
 flutter run
 ```
 
-* **Android emulator:** the app's default server is `http://10.0.2.2:8000`, which is the
-  emulator's name for your laptop. It works without changes.
+* **Android emulator:** the app's default server is the hosted Render site. To use your
+  laptop instead, set **More → Settings → Server address** to `http://10.0.2.2:8000`,
+  which is the emulator's name for your laptop.
 * **Real phone over USB:** turn on Developer options → USB debugging, connect the cable,
   then `flutter run`. In the app go to **More → Settings → Server address**, enter
   `http://192.168.1.10:8000` (your IP from Step 13) and tap **Save & Test connection**.

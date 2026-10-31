@@ -30,7 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) {
       setState(() {
         _testing = false;
-        _result = ok ? '✅ Connected to ${s.serverUrl}' : '❌ Cannot reach ${s.serverUrl}. Check the IP, that the phone and laptop share the same Wi-Fi, and that Windows Firewall allows port 8000.';
+        _result = ok ? '✅ Connected to ${s.serverUrl}' : '❌ Cannot reach ${s.serverUrl}. Check the address. For a laptop server: same Wi-Fi, and Windows Firewall allows port 8000.';
       });
     }
   }
@@ -47,7 +47,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           controller: _server,
           keyboardType: TextInputType.url,
           autocorrect: false,
-          decoration: const InputDecoration(hintText: 'http://192.168.1.10:8000', helperText: 'Emulator: http://10.0.2.2:8000 · Phone: your laptop\'s Wi-Fi IP from "ipconfig"', helperMaxLines: 2),
+          decoration: const InputDecoration(hintText: 'https://criclive-ur9a.onrender.com', helperText: 'Online: https://criclive-ur9a.onrender.com · Laptop on Wi-Fi: http://<IP from "ipconfig">:8000', helperMaxLines: 2),
         ),
         const SizedBox(height: 8),
         FilledButton.icon(onPressed: _testing ? null : _saveServer, icon: const Icon(Icons.wifi_tethering), label: Text('${context.t('save')} & ${context.t('test_connection')}')),
