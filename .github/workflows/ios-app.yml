@@ -1,0 +1,56 @@
+# Builds the iPhone app on GitHub's Mac computers (free for public repos), so
+# you don't need a Mac. The result is an UNSIGNED .ipa file, published at
+# https://github.com/<owner>/<repo>/releases/tag/ios-latest (CricLive-unsigned.ipa).
+#
+# An iPhone only installs signed apps. Two ways to sign it:
+#  - Free: Sideloadly or AltStore on a Windows PC with a free Apple ID
+#    (the app must be re-signed every 7 days).
+#  - Paid: Apple Developer account ($99/year) -> TestFlight / App Store.
+name: Build iOS app
+
+on:
+  push:
+    branches: [main]
+    paths: ["mobile/**", ".github/workflows/ios-app.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ipa:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build ios --release --no-codesign
+      - name: Pack Runner.app into an .ipa
+        run: |
+          mkdir -p build/ipa/Payload
+          cp -R build/ios/iphoneos/Runner.app build/ipa/Payload/
+          cd build/ipa && zip -qry ../CricLive-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: criclive-unsigned-ipa
+          path: mobile/build/CricLive-unsigned.ipa
+          retention-days: 30
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-latest
+          name: CricLive iPhone app (latest unsigned build)
+          body: |
+            Unsigned iPhone app (.ipa) for testing. An iPhone will not install it directly; it must be signed first.
+            Free way: on a Windows PC install Sideloadly (https://sideloadly.io) and iTunes, connect the iPhone by cable, drag CricLive-unsigned.ipa into Sideloadly, sign in with your Apple ID, press Start. On the iPhone: Settings -> General -> VPN & Device Management -> trust your Apple ID, and turn on Developer Mode (Settings -> Privacy & Security). Repeat every 7 days.
+            The app uses the Render server https://criclive-ur9a.onrender.com by default.
+            No PC? Open https://criclive-ur9a.onrender.com in Safari -> Share -> "Add to Home Screen".
+            Built from commit ${{ github.sha }}.
+          files: mobile/build/CricLive-unsigned.ipa
+          make_latest: false
